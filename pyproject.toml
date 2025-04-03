@@ -1,0 +1,20 @@
+[project]
+name = "nornir-cli"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "genie>=25.3",
+    "nornir>=3.5.0",
+    "nornir-napalm>=0.5.0",
+    "nornir-netbox>=0.3.0",
+    "nornir-netmiko>=1.0.1",
+    "orionsdk>=0.4.0",
+    "pyats>=25.3",
+    "python-dotenv>=1.1.0",
+    "requests>=2.32.3",
+    "rich>=14.0.0",
+    "toml>=0.10.2",
+    "typer>=0.15.2",
+]
