@@ -1,4 +1,4 @@
-# Nornir CLI
+# CLI for Running Nornir
 
 A command-line interface for network automation using [Nornir](https://github.com/nornir-automation/nornir) on Cisco devices.
 
@@ -9,6 +9,76 @@ This project is released as public source with the [Unlicense](https://unlicense
 ## Overview
 
 Nornir CLI uses the Nornir automation framework for network operations on Cisco devices. It provides a command-line interface built with Typer. Inventory can be provided with the default Nornir structure or via Netbox (see Inventory Management).
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/challey74/nornir-cli.git
+cd nornir-cli
+
+# Install dependencies with pip
+pip install -r requirements.txt
+
+# Or install with uv
+uv sync
+```
+
+## Usage
+
+### Shell Mode
+
+The primary way to interact with Nornir CLI is through its interactive shell:
+
+```bash
+python src/cli.py shell
+```
+
+### Inventory Management
+
+#### Loading Local Inventory
+
+```
+# In shell mode
+get-inventory --folder-path inventory/my-inventory
+```
+
+Local inventory requires a default [Nornir inventory](https://nornir.readthedocs.io/en/latest/tutorial/inventory.html):
+
+- `hosts.yaml`: Device definitions
+- `groups.yaml`: Group configurations
+- `defaults.yaml`: Default parameters
+- Optional `metadata.yaml`: Inventory metadata (file specific to this project)
+
+### NetBox Integration
+
+The CLI provides NetBox integration for retrieving inventory through the `get-inventory` command:
+
+```bash
+# In shell mode
+get-inventory --<api-parameter> <value>
+```
+
+List values can be passed as a comma separated string:
+
+```bash
+get-inventory --name--ic host1,host2,...
+```
+
+This command implements parameters from the NetBox REST API's `/dcim/devices` endpoint. For the complete list of available options, refer to the [NetBox API documentation](https://demo.netbox.dev/api/schema/swagger-ui/)
+
+#### Filtering Inventory
+
+Once inventory is loaded, it can be filtered:
+
+Using the `filter-hosts` command with specific options for each field:
+
+```
+# Filter by platform
+filter-hosts --filter-platform ios
+```
+
+Default behavior is to include hosts that match at least on filter. To inverse this to remove hosts that match any filter, use the `--exclude` flag.
 
 ## Key Components
 
@@ -62,64 +132,6 @@ def set_switch_boot_statement(task: Task, force: bool = True):
     if not success:
         return
 ```
-
-## Usage
-
-### Shell Mode
-
-The primary way to interact with Nornir CLI is through its interactive shell:
-
-```bash
-python src/cli.py shell
-```
-
-### Inventory Management
-
-#### Loading Local Inventory
-
-```
-# In shell mode
-get-inventory --folder-path inventory/my-inventory
-```
-
-Local inventory requires a default [Nornir inventory](https://nornir.readthedocs.io/en/latest/tutorial/inventory.html):
-
-- `hosts.yaml`: Device definitions
-- `groups.yaml`: Group configurations
-- `defaults.yaml`: Default parameters
-- Optional `metadata.yaml`: Inventory metadata (file specific to this project)
-
-### NetBox Integration
-
-The CLI provides NetBox integration for retrieving inventory through the `get-inventory` command:
-
-```bash
-# In shell mode
-get-inventory --<api-parameter> <value>
-```
-
-List values can be passed as a single comma separated string:
-
-```bash
-get-inventory --name--ic host1,host2,...
-```
-
-This command implements parameters from the NetBox REST API's `/dcim/devices` endpoint. For the complete list of available options, refer to the NetBox API documentation at:
-
-https://demo.netbox.dev/api/schema/swagger-ui/
-
-#### Filtering Inventory
-
-Once inventory is loaded, it can be filtered:
-
-Using the `filter-hosts` command with specific options for each field:
-
-```
-# Filter by platform
-filter-hosts --filter-platform="ios"
-```
-
-Default behavior is to include hosts that match at least on filter. To inverse this to remove hosts that match any filter, use the `--exclude` flag.
 
 ## Development
 
