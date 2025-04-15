@@ -1,8 +1,10 @@
+from typing import Any
+
 import logging
 import os
 
 from rich import print  # pylint: disable=W0622
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Prompt, Confirm, IntPrompt
 from nornir.core.filter import F
 from nornir.core.task import Task
 
@@ -53,9 +55,9 @@ def _edit_primary_image_md5(task: Task, primary_image, md5):
         task.host.data[DataFields.PRIMARY_IMAGE_MD5] = md5
 
 
-def get_primary_image_data():
+def get_primary_image_data(check_file_exists: bool = True):
     """Interactive prompt to set primary image data for all hosts per group"""
-    image_data = []
+    image_data: list[dict[Any, Any]] = []
     group_to_image_map = {}
 
     for group in CONFIG.nornir.inventory.groups:
@@ -80,12 +82,18 @@ def get_primary_image_data():
             )
             image_md5 = Prompt.ask(f"Enter the md5 for [cyan bold]{image_name}[/]")
 
-            filepath = os.path.join(CONFIG.env.image_folder, image_name)
-            if not os.path.exists(filepath):
-                logging.error("Image file not found: %s", filepath)
-                return
+            size = None
+            if check_file_exists:
+                filepath = os.path.join(CONFIG.env.image_folder, image_name)
+                if not os.path.exists(filepath):
+                    logging.error("Image file not found: %s", filepath)
+                    return
 
-            size = os.path.getsize(filepath)
+                size = os.path.getsize(filepath)
+            else:
+                size = IntPrompt.ask(
+                    f"Enter the file size in bytes for [cyan bold]{image_name}[/]"
+                )
 
             image_data.append(
                 {

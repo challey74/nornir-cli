@@ -74,4 +74,4 @@ class Metadata:
         """Print metadata."""
         print(f"Name: {self.name}")
         print(f"Filter Parameters: {self.filter_parameters}")
-        print(f"Time: {self.formatted_timestamp}")
+        print(f"Time: {self.timestamp_formatted}")

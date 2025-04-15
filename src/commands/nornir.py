@@ -1,3 +1,5 @@
+import typer
+
 import tasks.nornir
 
 from classes.config import Config
@@ -10,9 +12,13 @@ def edit_md5():
     tasks.nornir.edit_primary_image_md5()
 
 
-def set_primary_image():
+def set_primary_image(
+    check_file_exists: bool = typer.Option(
+        True, is_flag=True, help="Check if the file exists first"
+    ),
+):
     """Set the primary image for each device type."""
-    tasks.nornir.get_primary_image_data()
+    tasks.nornir.get_primary_image_data(check_file_exists=check_file_exists)
 
 
 def remove_hosts(hosts: str):

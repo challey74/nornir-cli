@@ -7,7 +7,11 @@ from nornir.core.inventory import Host
 from nornir_netmiko.tasks import netmiko_send_command
 from nornir_napalm.plugins.tasks import napalm_get
 
-from utils.data_fields import DataFields, get_required_host_vars, StackInfoFields
+from utils.data_fields import (
+    DataField,
+    DataFields,
+    StackInfoFields,
+)
 
 
 def get_hostname(task: Task) -> str | None:
@@ -47,7 +51,7 @@ def get_stack_info(
     if not force and task.host.get(DataFields.STACK_INFO) is not None:
         return
 
-    stack_info: dict[str, Any] = {
+    stack_info: dict[DataField, Any] = {
         StackInfoFields.IS_STACK: None,
         StackInfoFields.MEMBERS: None,
         StackInfoFields.MASTER: None,

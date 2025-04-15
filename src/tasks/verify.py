@@ -15,9 +15,8 @@ BOOT_STATEMENT_PATTERNS = {
 
 
 def verify_switch_boot_statement(task: Task, target_check_only: bool = False):
-    success, primary_image, platform = get_required_host_vars(
-        task.host,
-        [DataFields.PRIMARY_IMAGE, DataFields.PLATFORM],
+    success, primary_image = get_required_host_vars(
+        task.host, [DataFields.PRIMARY_IMAGE]
     )
 
     if not success:
@@ -52,15 +51,15 @@ def verify_boot_statement(task: Task):
     returns success or failure depending on what switch returns"""
 
     # TODO: add logic for no backup image
-    success, primary_image, current_image, platform = get_required_host_vars(
+    success, primary_image, current_image = get_required_host_vars(
         task.host,
-        [DataFields.PRIMARY_IMAGE, DataFields.CURRENT_IMAGE, DataFields.PLATFORM],
+        [DataFields.PRIMARY_IMAGE, DataFields.CURRENT_IMAGE],
     )
 
     if not success:
         return
 
-    if not platform.lower() == "ios" and not platform.lower() == "ios-xe":
+    if task.host.platform.lower() not in ["ios", "ios-xe"]:
         logging.error(
             "Platform not supported for verify boot statement for %s", task.host
         )

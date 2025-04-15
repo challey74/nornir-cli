@@ -6,7 +6,7 @@ from nornir_netmiko.tasks import netmiko_save_config
 import tasks.configure
 
 from classes.config import Config
-from utils.data_fields import validate_reload_date
+from utils.validators import validate_reload_date
 
 CONFIG = Config()
 

@@ -5,19 +5,15 @@ import logging
 
 from rich import print  # pylint: disable=W0622
 from rich.prompt import Confirm
+from nornir.core.inventory import Host
 
 import typer
 
 from classes.config import Config
-from utils.data_fields import DataFields, StackInfoFields
 from tasks.nornir import remove_hosts
+from utils.data_fields import DataFields
 
 CONFIG = Config()
-
-
-def show_inventory_name():
-    """Show save name in inventory."""
-    print(CONFIG.metadata.name)
 
 
 def show_hosts(
@@ -34,34 +30,6 @@ def show_hosts(
     else:
         for host in hosts:
             print(host)
-
-
-def show_md5_verification(
-    failed_only: bool = typer.Option(
-        False, is_flag=True, help="Show only failed md5 verifications."
-    ),
-    successful_only: bool = typer.Option(
-        False, is_flag=True, help="Show only successful md5 verifications."
-    ),
-):
-    hosts = CONFIG.nornir.inventory.hosts
-
-    if failed_only:
-        print("Failed MD5 Verification:")
-        for hostname, host in hosts.items():
-            if host.data.get(DataFields.PRIMARY_IMAGE_MD5_VERIFIED) is False:
-                print(hostname)
-
-    elif successful_only:
-        print("Successful MD5 Verification:")
-        for hostname, host in hosts.items():
-            if host.data.get(DataFields.PRIMARY_IMAGE_MD5_VERIFIED) is True:
-                print(hostname)
-
-    else:
-        print("MD5 Verification:")
-        for hostname, host in hosts.items():
-            print(f"{hostname}: {host.data.get(DataFields.PRIMARY_IMAGE_MD5_VERIFIED)}")
 
 
 def show_groups(
@@ -107,13 +75,7 @@ def _generate_field_wrapper(
     include_filter_args: bool = True,
     include_regular_args: bool = True,
 ) -> Callable:
-    # Collect and sort fields alphabetically
-    all_fields = sorted(
-        [field for field in dir(DataFields) if not field.startswith("_")]
-    )
-    all_fields.extend(
-        sorted([field for field in dir(StackInfoFields) if not field.startswith("_")])
-    )
+    all_fields = DataFields.get_fields()
 
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -197,10 +159,11 @@ def _generate_field_wrapper(
     return decorator
 
 
-def _get_host_data(host, field_name, default="NOT PRESENT"):
-    if field_name.upper() in StackInfoFields.__dict__:
-        return host.data.get(DataFields.STACK_INFO, {}).get(field_name, default)
-    return host.data.get(field_name, default)
+def _get_host_data(host: Host, field_name: str, default: Any = "NOT PRESENT"):
+    for key in field_name.split("__"):
+        data = host.data.get(key, {})
+
+    return data if data else default
 
 
 def _cast_value(value: str, cast_type: Any) -> Any:
@@ -428,4 +391,4 @@ def filter_hosts(
 def show_metadata():
     """Show metadata in inventory."""
 
-    print(CONFIG.metadata.print())
+    CONFIG.metadata.print()
