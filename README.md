@@ -78,7 +78,7 @@ Using the `filter-hosts` command with specific options for each field:
 filter-hosts --filter-platform ios
 ```
 
-Default behavior is to include hosts that match at least on filter. To inverse this to remove hosts that match any filter, use the `--exclude` flag.
+Default behavior is to include hosts that match at least on filter. To inverse this to remove hosts that match any filter, use the `--exclude` flag. You can cast values to different types by <type>:<value>. For example, int:1234 cast the string '1234' to the integer
 
 ## Key Components
 
@@ -106,31 +106,42 @@ Environment variables are accessible via the `Env` class through `CONFIG.env.<va
 
 ### Data Fields
 
-The `DataFields` class standardizes data keys used for device attributes.
-These keys are used to store data in the host.data dict and for generate args
-for the filter-hosts function.
+The `DataFields` class provides a structure to represent device attributes using strongly-typed field definitions with custom validation. This helps ensure consistent data validation and access patterns throughout the application.
 
 ```python
 class DataFields:
-    PRIMARY_IMAGE = "primary_image"
-    IOS_VERSION = "ios_version"
-    STACK_INFO = "stack_info"
-    # Additional fields...
+    """Class to model the keys and values of the data dictionary on a Host"""
+
+    # Custom fields with proper typing and validation
+    PRIMARY_IMAGE = DataField("primary_image", str, [is_not_empty_string])
+    IOS_VERSION = DataField("ios_version", str, [is_not_empty_string])
+    STACK_INFO = DataField("stack_info", StackInfoFields)
+
+    # Netbox fields with nested structure support
+    DEVICE_TYPE = DataField("device_type", DeviceTypeFields)
+    PLATFORM = DataField("platform", PlatformFields)
+    VIRTUAL_CHASSIS = DataField("virtual_chassis", VirtualChassisFields)
+
+    @classmethod
+    def get_fields(cls) -> list[str]:
+        """Get all fields from DataFields including nested structures."""
+        # Implementation details in class
 ```
 
-A helper function of `get_required_host_vars` is provided to know if any value is None
+A helper function of `get_required_host_vars` is provided to know if any value is not present or passes validation
 as the first element returned will be False.
-
-Usage:
 
 ```python
 def set_switch_boot_statement(task: Task, force: bool = True):
-    success, primary_image, current_image, stack_info = get_required_host_vars(
+    # Get field values using DataField objects as keys
+    success, primary_image, ios_version, stack_info = get_required_host_data(
         task.host,
-        [DataFields.PRIMARY_IMAGE, DataFields.CURRENT_IMAGE, DataFields.STACK_INFO],
+        [DataFields.PRIMARY_IMAGE, DataFields.IOS_VERSION, DataFields.STACK_INFO]
     )
     if not success:
         return
+
+    # Continue with validated data...
 ```
 
 ## Development
