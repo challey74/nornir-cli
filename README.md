@@ -128,7 +128,7 @@ class DataFields:
         # Implementation details in class
 ```
 
-A helper function of `get_required_host_vars` is provided to know if any value is not present or passes validation
+A helper function of `get_required_host_vars` is provided to know if any value is not present or does not pass validation
 as the first element returned will be False.
 
 ```python
